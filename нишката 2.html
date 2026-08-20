@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Нишката на времето — българска история</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17130F;
+    --ink-2:#1E1912;
+    --parchment:#EFE3C8;
+    --parchment-dim:#C9BFA6;
+    --gold:#C9A24B;
+    --gold-bright:#E4C374;
+    --oxblood:#7A2331;
+    --verdigris:#3E6E58;
+    --stone:#9C8F76;
+    --serif:'PT Serif', serif;
+    --sans:'PT Sans', sans-serif;
+    --display:'Yeseva One', serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--parchment);
+    font-family:var(--serif);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--gold); color:var(--ink);}
+
+  a{color:var(--gold-bright);}
+
+  /* ---------- progress bar (mobile) ---------- */
+  .progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg,var(--oxblood),var(--gold));
+    z-index:50; transition:width .1s linear;
+  }
+
+  /* ---------- side rail (desktop) ---------- */
+  .rail{
+    position:fixed; left:28px; top:50%; transform:translateY(-50%);
+    z-index:40; display:flex; flex-direction:column; gap:16px;
+  }
+  .rail a{
+    display:block; width:9px; height:9px; border-radius:50%;
+    background:transparent; border:1.5px solid var(--stone);
+    cursor:pointer; padding:0; transition:all .3s ease;
+  }
+  .rail a.active{background:var(--gold); border-color:var(--gold); box-shadow:0 0 10px var(--gold);}
+  .rail a:focus-visible{outline:2px solid var(--gold-bright); outline-offset:4px;}
+  @media (max-width:900px){ .rail{display:none;} }
+
+  /* ---------- mobile nav (horizontal, scrollable) ---------- */
+  .mobile-nav{
+    display:none;
+    position:fixed; top:3px; left:0; right:0; z-index:45;
+    background:rgba(23,19,15,0.94); backdrop-filter:blur(6px);
+    padding:10px 12px; gap:8px; overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    border-bottom:1px solid rgba(201,162,75,.15);
+  }
+  .mobile-nav a{
+    font-family:var(--sans); font-size:.72rem; letter-spacing:.02em;
+    color:var(--parchment-dim); background:transparent;
+    border:1px solid rgba(201,162,75,.3); border-radius:999px;
+    padding:7px 13px; white-space:nowrap; text-decoration:none; flex:0 0 auto;
+  }
+  .mobile-nav a.active{color:var(--ink); background:var(--gold); border-color:var(--gold);}
+  .mobile-nav a:focus-visible{outline:2px solid var(--gold-bright); outline-offset:2px;}
+  @media (max-width:900px){
+    .mobile-nav{display:flex;}
+    section{padding-top:calc(min(14vh,120px) + 54px) !important;}
+    .hero{padding-top:calc(8vh + 54px) !important;}
+  }
+
+  /* ---------- shared section scaffolding ---------- */
+  section{
+    position:relative;
+    padding:min(14vh,120px) 24px 10vh;
+    max-width:760px;
+    margin:0 auto;
+  }
+  .era{
+    padding-left:34px;
+    border-left:1px solid rgba(201,162,75,0.25);
+  }
+  @media (max-width:640px){ .era{padding-left:22px;} }
+
+  .seal{
+    width:52px; height:52px; border-radius:50%;
+    border:1.5px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--sans); font-weight:700; font-size:.72rem;
+    color:var(--gold-bright); background:radial-gradient(circle at 35% 30%, rgba(201,162,75,.18), transparent 70%);
+    margin-left:-51px; margin-bottom:22px;
+    transform:scale(.4); opacity:0;
+    transition:transform .7s cubic-bezier(.2,1.4,.4,1), opacity .5s ease, box-shadow .6s ease;
+  }
+  .era.in-view .seal{ transform:scale(1); opacity:1; box-shadow:0 0 24px rgba(201,162,75,.35); }
+
+  .eyebrow{
+    font-family:var(--sans); text-transform:uppercase; letter-spacing:.14em;
+    font-size:.74rem; color:var(--stone); margin-bottom:10px;
+    opacity:0; transform:translateY(10px); transition:all .6s ease .1s;
+  }
+  .era.in-view .eyebrow{opacity:1; transform:none;}
+
+  h2{
+    font-family:var(--display); font-weight:400;
+    font-size:clamp(1.9rem,4.4vw,3rem);
+    line-height:1.1; margin:0 0 20px;
+    color:var(--parchment);
+    opacity:0; transform:translateY(16px); transition:all .7s ease .15s;
+  }
+  .era.in-view h2{opacity:1; transform:none;}
+
+  p.lede{
+    font-size:1.08rem; color:var(--parchment-dim); max-width:56ch;
+    opacity:0; transform:translateY(14px); transition:all .7s ease .25s;
+  }
+  .era.in-view p.lede{opacity:1; transform:none;}
+
+  .chips{
+    display:flex; flex-wrap:wrap; gap:12px; margin-top:28px;
+    opacity:0; transform:translateY(14px); transition:all .7s ease .35s;
+  }
+  .era.in-view .chips{opacity:1; transform:none;}
+  .chip{
+    border-top:2px solid var(--oxblood);
+    background:rgba(239,227,200,0.04);
+    padding:12px 14px; min-width:150px; flex:1 1 190px;
+  }
+  .chip .k{
+    font-family:var(--sans); text-transform:uppercase; letter-spacing:.08em;
+    font-size:.66rem; color:var(--gold-bright); display:block; margin-bottom:5px;
+  }
+  .chip .v{font-family:var(--sans); font-size:.92rem; color:var(--parchment);}
+
+  /* ---------- hero ---------- */
+  .hero{
+    min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+    max-width:820px; padding-top:8vh;
+  }
+  .hero .eyebrow{opacity:1; transform:none; animation:rise .8s ease .2s both;}
+  .hero h1{
+    font-family:var(--display); font-weight:400;
+    font-size:clamp(2.6rem,8vw,5.2rem); line-height:1.02;
+    margin:8px 0 22px; color:var(--parchment);
+    animation:rise .9s ease .35s both;
+  }
+  .hero h1 em{font-style:normal; color:var(--gold-bright);}
+  .hero .sub{
+    font-size:1.15rem; color:var(--parchment-dim); max-width:46ch;
+    animation:rise .9s ease .5s both;
+  }
+  .scrollcue{
+    margin-top:56px; font-family:var(--sans); font-size:.78rem;
+    letter-spacing:.1em; color:var(--stone); text-transform:uppercase;
+    animation:rise .9s ease .7s both, bob 2.2s ease-in-out 1.6s infinite;
+  }
+  @keyframes rise{from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;}}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+
+  /* ---------- section background moods ---------- */
+  .mood-1{background:radial-gradient(ellipse at 20% 0%, rgba(62,110,88,.16), transparent 60%);}
+  .mood-2{background:radial-gradient(ellipse at 80% 10%, rgba(201,162,75,.14), transparent 60%);}
+  .mood-3{background:radial-gradient(ellipse at 15% 20%, rgba(201,162,75,.12), transparent 60%);}
+  .mood-4{background:radial-gradient(ellipse at 85% 0%, rgba(122,35,49,.20), transparent 60%);}
+  .mood-5{background:radial-gradient(ellipse at 10% 0%, rgba(122,35,49,.24), transparent 60%);}
+  .mood-6{background:radial-gradient(ellipse at 80% 0%, rgba(201,162,75,.20), transparent 60%);}
+  .mood-7{background:radial-gradient(ellipse at 20% 0%, rgba(62,110,88,.18), transparent 60%);}
+
+  /* ---------- divider quote ---------- */
+  .quote{
+    max-width:640px; margin:0 auto; padding:9vh 24px; text-align:center;
+  }
+  .quote p{
+    font-family:var(--display); font-weight:400; font-size:clamp(1.3rem,3vw,1.9rem);
+    color:var(--gold-bright); line-height:1.4; margin:0;
+    opacity:0; transform:translateY(10px); transition:all .8s ease;
+  }
+  .quote.in-view p{opacity:1; transform:none;}
+  .quote span{display:block; font-family:var(--sans); font-size:.78rem; color:var(--stone); margin-top:14px; letter-spacing:.05em;}
+
+  /* ---------- quiz ---------- */
+  .quiz-wrap{max-width:900px;}
+  .quiz-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:16px; margin-top:20px;
+  }
+  .flip{
+    perspective:1000px; height:150px; cursor:pointer;
+  }
+  .flip-inner{
+    position:relative; width:100%; height:100%; text-align:left;
+    transition:transform .6s cubic-bezier(.3,1,.4,1); transform-style:preserve-3d;
+  }
+  .flip.flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{
+    position:absolute; inset:0; backface-visibility:hidden;
+    border:1px solid rgba(201,162,75,.3); padding:16px; display:flex; flex-direction:column; justify-content:center;
+  }
+  .flip-front{background:rgba(201,162,75,.05);}
+  .flip-front .date{font-family:var(--display); font-size:1.6rem; color:var(--gold-bright);}
+  .flip-front .hint{font-family:var(--sans); font-size:.7rem; color:var(--stone); margin-top:8px; text-transform:uppercase; letter-spacing:.06em;}
+  .flip-back{background:rgba(122,35,49,.14); transform:rotateY(180deg);}
+  .flip-back p{margin:0; font-family:var(--sans); font-size:.86rem; color:var(--parchment);}
+  .flip:focus-visible .flip-inner{outline:2px solid var(--gold-bright); outline-offset:4px;}
+
+  footer{
+    text-align:center; padding:8vh 24px 10vh; color:var(--stone);
+    font-family:var(--sans); font-size:.8rem;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<nav class="rail" id="rail" aria-label="Навигация по епохи"></nav>
+<nav class="mobile-nav" id="mobileNav" aria-label="Навигация по епохи"></nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">Изпит по история · самоподготовка</div>
+  <h1>Нишката на <em>времето</em></h1>
+  <p class="sub">От древността до съвременна България — историята, подредена като ясна последователност от решения, изпитания и повратни моменти.</p>
+  <div class="scrollcue">Следвайте нишката ↓</div>
+</section>
+
+<!-- 1: THRACE -->
+<section class="mood-1">
+  <div class="era" id="trakia" data-nav="Тракия">
+    <div class="seal">V хил.<br>пр.Хр.</div>
+    <div class="eyebrow">Преди България</div>
+    <h2>Земя преди името</h2>
+    <p class="lede">Хилядолетия преди създаването на България земите на днешната държава са населявани от различни общности, сред които многобройни тракийски племена. Те оставят забележителни съкровища, гробници, светилища и сведения за сложен религиозен живот.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Наследство</span><span class="v">Панагюрското и Вълчитрънското златно съкровище</span></div>
+      <div class="chip"><span class="k">Култура</span><span class="v">Орфическа традиция, обредни гробници и храмове</span></div>
+      <div class="chip"><span class="k">За изпита</span><span class="v">Формирането на средновековната българска народност е продължителен и сложен исторически процес</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="quote"><p>Историята започва преди държавата, но държавата дава име на политическата общност.<span>ОТ ДРЕВНОСТТА КЪМ СРЕДНОВЕКОВИЕТО</span></p></div>
+
+<!-- 2: 681 -->
+<section class="mood-2">
+  <div class="era" id="osnovavane" data-nav="681 г.">
+    <div class="seal">681</div>
+    <div class="eyebrow">681 година</div>
+    <h2>Раждането на държавата</h2>
+    <p class="lede">След победата на Аспаруховите българи при Онгъла Византия сключва мир и се задължава да плаща данък. 681 г. се приема за начална дата на Дунавска България — държава, изградена чрез съюз и взаимодействие между прабългари, славяни и други местни общности.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Владетел</span><span class="v">Хан Аспарух</span></div>
+      <div class="chip"><span class="k">Ключова дата</span><span class="v">681 г. — договор с Византия</span></div>
+      <div class="chip"><span class="k">Столица</span><span class="v">Плиска</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3: CHRISTIANISATION -->
+<section class="mood-6">
+  <div class="era" id="pokrastevane" data-nav="Покръстване">
+    <div class="seal">864/<br>865</div>
+    <div class="eyebrow">IX век</div>
+    <h2>Една вяра, един книжовен език</h2>
+    <p class="lede">Княз Борис I приема християнството и превръща България в част от християнска Европа. След пристигането на учениците на Кирил и Методий през 886 г. държавата подкрепя книжовни средища, в които старобългарският език се утвърждава в богослужението и културата.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Владетел</span><span class="v">Княз Борис I Михаил (852–889)</span></div>
+      <div class="chip"><span class="k">Промяна</span><span class="v">Покръстване на българите, 864/865 г.</span></div>
+      <div class="chip"><span class="k">Книжовност</span><span class="v">Учениците на Кирил и Методий са приети в България през 886 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4: GOLDEN AGE -->
+<section class="mood-3">
+  <div class="era" id="zlatenvek" data-nav="Златен век">
+    <div class="seal">893–<br>927</div>
+    <div class="eyebrow">Златен век</div>
+    <h2>Буквите като оръжие</h2>
+    <p class="lede">При цар Симеон Велики Преслав се превръща в книжовен и културен център. Кирилицата възниква и се развива в книжовните средища на Първото българско царство, най-често свързвана с Преславската школа, а старобългарските произведения и преводи достигат до други славянски земи.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Владетел</span><span class="v">Цар Симеон Велики</span></div>
+      <div class="chip"><span class="k">Средище</span><span class="v">Преславска книжовна школа</span></div>
+      <div class="chip"><span class="k">927 година</span><span class="v">При цар Петър I е призната Българската патриаршия</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5: SAMUIL AND BYZANTINE RULE -->
+<section class="mood-5">
+  <div class="era" id="samuil" data-nav="Самуил">
+    <div class="seal">971–<br>1018</div>
+    <div class="eyebrow">Краят на Първото царство</div>
+    <h2>Последната съпротива</h2>
+    <p class="lede">След завладяването на източните български земи от Византия през 971 г. борбата продължава на запад. Цар Самуил води дълга война с император Василий II. След поражението при Ключ през 1014 г. съпротивата отслабва, а през 1018 г. българските земи са включени във Византийската империя.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Владетел</span><span class="v">Цар Самуил (997–1014)</span></div>
+      <div class="chip"><span class="k">Ключово събитие</span><span class="v">Битката при Ключ, 1014 г.</span></div>
+      <div class="chip"><span class="k">Край</span><span class="v">1018 г. — падане на Първото българско царство</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6: SECOND EMPIRE -->
+<section class="mood-4">
+  <div class="era" id="vtoroto-tsarstvo" data-nav="Второ царство">
+    <div class="seal">1185</div>
+    <div class="eyebrow">Второто царство</div>
+    <h2>Търново въстава</h2>
+    <p class="lede">Братята Асен и Петър вдигат въстание срещу византийската власт и възстановяват българската държава с център Търново. Калоян утвърждава международното ѝ положение, а след победата при Клокотница през 1230 г. при Иван Асен II България достига най-голямото си териториално влияние през XIII век.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Основатели</span><span class="v">Братята Асен и Петър</span></div>
+      <div class="chip"><span class="k">Калоян</span><span class="v">Победа над Латинската империя при Одрин, 1205 г.</span></div>
+      <div class="chip"><span class="k">Връх</span><span class="v">Иван Асен II и битката при Клокотница, 1230 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7: FALL OF MEDIEVAL BULGARIA -->
+<section class="mood-5">
+  <div class="era" id="padane" data-nav="1393–1396">
+    <div class="seal">1393–<br>1396</div>
+    <div class="eyebrow">Краят на Второто царство</div>
+    <h2>Столицата пада, после и Видин</h2>
+    <p class="lede">Политическото раздробяване и османското настъпление отслабват българските владения. Търново е превзето през 1393 г., Иван Шишман е убит през 1395 г., а през 1396 г. е покорено Видинското царство. Затова 1396 г. традиционно се приема за край на средновековната българска държавност.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">1393</span><span class="v">Падане на Търново след продължителна обсада</span></div>
+      <div class="chip"><span class="k">1395</span><span class="v">Смъртта на цар Иван Шишман</span></div>
+      <div class="chip"><span class="k">1396</span><span class="v">Падане на Видинското царство</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="quote"><p>Държавата е унищожена, но езикът, вярата и общностната памет остават.<span>ПОД ОСМАНСКА ВЛАСТ</span></p></div>
+
+<!-- 8: OTTOMAN -->
+<section class="mood-5">
+  <div class="era" id="osmanska-vlast" data-nav="Османска власт">
+    <div class="seal">1396–<br>1878</div>
+    <div class="eyebrow">Краят на XIV век – 1878</div>
+    <h2>Без собствена държава</h2>
+    <p class="lede">Българските земи постепенно са включени в Османската империя, а самостоятелните държавни и църковни институции са премахнати. Условията се променят през различните столетия, но местните общности съхраняват езика, православната вяра и историческата памет чрез семейството, селището, църквите и манастирите.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Период</span><span class="v">Краят на XIV век – 1878 г.</span></div>
+      <div class="chip"><span class="k">Пазители</span><span class="v">Манастирите — особено Рилският манастир</span></div>
+      <div class="chip"><span class="k">Съпротива</span><span class="v">Хайдушко движение</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9: REVIVAL -->
+<section class="mood-6">
+  <div class="era" id="vazrazhdane" data-nav="Възраждане">
+    <div class="seal">1762</div>
+    <div class="eyebrow">Възраждане</div>
+    <h2>Народе, знай своя род</h2>
+    <p class="lede">Един монах в Атонска обител написва история, която ще събуди цяла нация. От Паисий Хилендарски до Левски и Ботев — Възраждането е епохата, в която България си спомня коя е.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Искра</span><span class="v">Паисий Хилендарски, „История славянобългарска", 1762 г.</span></div>
+      <div class="chip"><span class="k">Революционери</span><span class="v">Васил Левски, Христо Ботев</span></div>
+      <div class="chip"><span class="k">Връх</span><span class="v">Априлско въстание, 1876 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10: LIBERATION -->
+<section class="mood-7">
+  <div class="era" id="osvobozhdenie" data-nav="Освобождение">
+    <div class="seal">1878</div>
+    <div class="eyebrow">3 март 1878</div>
+    <h2>Свободата идва през Шипка</h2>
+    <p class="lede">Руско-турската война от 1877–1878 г. създава условия за възстановяване на българската държавност. Българското опълчение и руските войски отбраняват Шипченския проход. Предварителният Санстефански договор е последван от Берлинския договор, който учредява Княжество България и автономната област Източна Румелия.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Война</span><span class="v">Руско-турска освободителна война, 1877–1878</span></div>
+      <div class="chip"><span class="k">Символ</span><span class="v">Шипченската епопея</span></div>
+      <div class="chip"><span class="k">Берлински договор</span><span class="v">Княжество България и Източна Румелия, юли 1878 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 11: UNIFICATION AND INDEPENDENCE -->
+<section class="mood-2">
+  <div class="era" id="saedinenie" data-nav="1885–1908">
+    <div class="seal">1885–<br>1908</div>
+    <div class="eyebrow">Утвърждаване на държавата</div>
+    <h2>Съединение и Независимост</h2>
+    <p class="lede">На 6 септември 1885 г. Княжество България и Източна Румелия се съединяват. Победата в последвалата Сръбско-българска война защитава делото. На 22 септември 1908 г. във Велико Търново е провъзгласена Независимостта и България прекратява формалната си зависимост от Османската империя.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">6 септември 1885</span><span class="v">Съединение на Княжество България и Източна Румелия</span></div>
+      <div class="chip"><span class="k">Ноември 1885</span><span class="v">Победа при Сливница в Сръбско-българската война</span></div>
+      <div class="chip"><span class="k">22 септември 1908</span><span class="v">Провъзгласяване на Независимостта</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12: WARS -->
+<section class="mood-4">
+  <div class="era" id="voini" data-nav="Войните">
+    <div class="seal">1912–<br>1945</div>
+    <div class="eyebrow">Първата половина на ХХ век</div>
+    <h2>Националният идеал и цената му</h2>
+    <p class="lede">В Балканската война България воюва за освобождението на останалите под османска власт територии, но Междусъюзническата и Първата световна война завършват с тежки поражения и териториални загуби. През Втората световна война страната се присъединява към Тристранния пакт, без да изпраща войски на Източния фронт; през септември 1944 г. СССР обявява война на България и властта е поета от Отечествения фронт.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">Балкански войни</span><span class="v">1912–1913 г.</span></div>
+      <div class="chip"><span class="k">Първа световна</span><span class="v">България участва през 1915–1918 г.</span></div>
+      <div class="chip"><span class="k">Втора световна</span><span class="v">Политически прелом на 9 септември 1944 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13: COMMUNIST PERIOD -->
+<section class="mood-1">
+  <div class="era" id="komunizam" data-nav="1946–1989">
+    <div class="seal">1944–<br>1989</div>
+    <div class="eyebrow">Народна република България</div>
+    <h2>Държава под властта на партията</h2>
+    <p class="lede">След 1944 г. политическата система е преобразена по съветски модел. Монархията е премахната след референдум през 1946 г., опозицията е унищожена, икономиката е национализирана, а Българската комунистическа партия установява еднопартийно управление. Периодът носи ускорена индустриализация и урбанизация, но и репресии, цензура и ограничени граждански свободи.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">1946</span><span class="v">Провъзгласена е Народна република България</span></div>
+      <div class="chip"><span class="k">Управление</span><span class="v">Еднопартийна система, доминирана от БКП</span></div>
+      <div class="chip"><span class="k">Край на периода</span><span class="v">10 ноември 1989 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 14: DEMOCRATIC BULGARIA -->
+<section class="mood-7">
+  <div class="era" id="demokratsia" data-nav="Днес">
+    <div class="seal">1989–<br>днес</div>
+    <div class="eyebrow">Преход и европейска интеграция</div>
+    <h2>Връщане към демокрацията</h2>
+    <p class="lede">След отстраняването на Тодор Живков на 10 ноември 1989 г. започва преход към многопартийна демокрация и пазарна икономика. Конституцията от 1991 г. установява парламентарна република. България става член на НАТО през 2004 г. и на Европейския съюз през 2007 г.</p>
+    <div class="chips">
+      <div class="chip"><span class="k">1991</span><span class="v">Приета е действащата Конституция</span></div>
+      <div class="chip"><span class="k">НАТО</span><span class="v">Членство от 2004 г.</span></div>
+      <div class="chip"><span class="k">Европейски съюз</span><span class="v">Членство от 2007 г.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section class="quiz-wrap">
+  <div class="eyebrow" style="opacity:1;transform:none;">Провери се</div>
+  <h2 style="opacity:1;transform:none;">Ключови дати</h2>
+  <p class="lede" style="opacity:1;transform:none;">Докоснете картичка, за да видите защо датата е важна за изпита.</p>
+  <div class="quiz-grid" id="quizGrid"></div>
+</section>
+
+<footer>Нишката на времето · направено за самоподготовка по история</footer>
+
+<script>
+  // ---- nav generation (real anchor links so they work even if JS fails) ----
+  const eras = document.querySelectorAll('.era');
+  const rail = document.getElementById('rail');
+  const mobileNav = document.getElementById('mobileNav');
+  eras.forEach((el, i) => {
+    const a1 = document.createElement('a');
+    a1.href = '#' + el.id;
+    a1.setAttribute('aria-label', el.dataset.nav);
+    rail.appendChild(a1);
+
+    const a2 = document.createElement('a');
+    a2.href = '#' + el.id;
+    a2.textContent = el.dataset.nav;
+    mobileNav.appendChild(a2);
+  });
+  const railBtns = rail.querySelectorAll('a');
+  const mobileBtns = mobileNav.querySelectorAll('a');
+
+  // ---- reveal on scroll ----
+  const revealTargets = document.querySelectorAll('.era, .quote');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('in-view');
+    });
+  }, {threshold:0.3});
+  revealTargets.forEach(t => io.observe(t));
+
+  // ---- active rail dot + progress bar ----
+  const progress = document.getElementById('progress');
+  function onScroll(){
+    const doc = document.documentElement;
+    const pct = (doc.scrollTop) / (doc.scrollHeight - doc.clientHeight) * 100;
+    progress.style.width = pct + '%';
+
+    let activeIdx = 0;
+    eras.forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight * 0.5) activeIdx = i;
+    });
+    railBtns.forEach((b,i) => b.classList.toggle('active', i === activeIdx));
+    mobileBtns.forEach((b,i) => b.classList.toggle('active', i === activeIdx));
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // ---- flashcards ----
+  const cards = [
+    {date:'681', text:'Хан Аспарух сключва мирен договор с Византия — приетата начална дата на Дунавска България.'},
+    {date:'864/865', text:'Покръстването при княз Борис I — България приема християнството.'},
+    {date:'886', text:'Учениците на Кирил и Методий са приети в България и получават държавна подкрепа.'},
+    {date:'893', text:'Преславският събор утвърждава старобългарския език в държавата и църквата.'},
+    {date:'927', text:'При цар Петър I е призната Българската патриаршия.'},
+    {date:'1018', text:'Краят на Първото българско царство и включване на българските земи във Византия.'},
+    {date:'1185', text:'Въстанието на Асен и Петър възстановява българската държава.'},
+    {date:'1230', text:'Победата при Клокотница утвърждава могъществото на България при Иван Асен II.'},
+    {date:'1393', text:'Търново пада под османска власт след продължителна обсада.'},
+    {date:'1396', text:'Падането на Видинското царство — традиционният край на средновековната българска държавност.'},
+    {date:'1762', text:'Паисий Хилендарски написва „История славянобългарска" — искрата на Възраждането.'},
+    {date:'1876', text:'Априлското въстание привлича вниманието на Европа към българския въпрос.'},
+    {date:'1878', text:'Войната и последвалите договори възстановяват българската държавност.'},
+    {date:'1885', text:'Съединението обединява Княжество България и Източна Румелия.'},
+    {date:'1908', text:'България провъзгласява своята Независимост във Велико Търново.'},
+    {date:'1946', text:'Монархията е премахната и е провъзгласена Народна република България.'},
+    {date:'1989', text:'На 10 ноември започва преходът от еднопартийно управление към демокрация.'},
+    {date:'2004', text:'България става член на НАТО.'},
+    {date:'2007', text:'България става член на Европейския съюз.'},
+  ];
+  const grid = document.getElementById('quizGrid');
+  cards.forEach(c => {
+    const wrap = document.createElement('div');
+    wrap.className = 'flip';
+    wrap.tabIndex = 0;
+    wrap.innerHTML = `
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div class="date">${c.date}</div>
+          <div class="hint">Докоснете</div>
+        </div>
+        <div class="flip-face flip-back"><p>${c.text}</p></div>
+      </div>`;
+    const toggle = () => wrap.classList.toggle('flipped');
+    wrap.addEventListener('click', toggle);
+    wrap.addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
+    grid.appendChild(wrap);
+  });
+</script>
+</body>
+</html>
+
